@@ -12,7 +12,7 @@ export default function SearchBar({
   placeholder = "Search for movies or TV series",
 }: SearchBarProps) {
   return (
-    <search className="flex items-center gap-3 px-6 py-4">
+    <search className="flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-4">
 
       <label htmlFor="search-input" className="sr-only">
         Search
