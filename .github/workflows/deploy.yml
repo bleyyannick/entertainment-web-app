@@ -2,7 +2,7 @@ name: Deploy environment-web-app to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, deployment]
   workflow_dispatch:
 
 permissions:
@@ -40,9 +40,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # Définit le base path Vite selon le nom du dépôt GitHub (ex: /mon-repo/)
+          # Extrait le nom du dépôt depuis "owner/repo" → "/repo/"
           BASE_PATH: /${{ github.event.repository.name }}/
-          # Utilise le data.json inclus dans le build (déploiement 100% statique)
           VITE_API_URL: ./data.json
 
       - name: Upload artifact Pages
