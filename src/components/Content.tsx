@@ -1,5 +1,6 @@
 import MovieCard from "./MovieCard"
 import EmptyState from "./EmptyState"
+import TrendingCarousel from "./TrendingCarousel"
 import { useMedia } from "../hooks/useMedia"
 import type { Section } from "./Navbar"
 
@@ -40,6 +41,10 @@ export default function Content({ query, activeSection }: ContentProps) {
 
   return (
     <main data-testid="content" className="min-h-screen bg-[#0d1117] px-8 pt-4 pb-10">
+      {activeSection === "Home" && !query.trim() && media && media.length > 0 && (
+        <TrendingCarousel media={media} />
+      )}
+
       <h1 data-testid="content-title" className="text-white text-2xl font-semibold mb-6">
         {query ? `Résultats pour « ${query} »` : sectionLabel[activeSection]}
       </h1>
