@@ -10,11 +10,11 @@ export default function App() {
 
   return (
     <div className="bg-[#0d1117] min-h-screen">
-      <Navbar activeSection={activeSection} onSectionChange={setActiveSection} />
-      <div className="pl-[72px]">
-        <SearchBar value={query} onChange={setQuery} />
-        <Content query={query} activeSection={activeSection} />
-      </div>
+    <Navbar activeSection={activeSection} onSectionChange={setActiveSection} />
+    <div className="pt-16 lg:pt-0 lg:pl-[72px]">
+      <SearchBar value={query} onChange={setQuery} />
+      <Content query={query} activeSection={activeSection} />
     </div>
+  </div>
   )
 }

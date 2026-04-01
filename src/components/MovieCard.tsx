@@ -13,6 +13,8 @@ interface MovieCardProps {
 export default function MovieCard({ title, year, type, rating, poster, isBookmarked }: MovieCardProps) {
   return (
     <div data-testid="movie-card" className="group cursor-pointer">
+
+      {/* Poster */}
       <div className="relative rounded-lg overflow-hidden aspect-[4/3] mb-2">
         <img
           src={poster.large}
@@ -22,17 +24,34 @@ export default function MovieCard({ title, year, type, rating, poster, isBookmar
           className="w-full h-full object-cover group-hover:scale-105
             transition-transform duration-300"
         />
-        <button data-testid="bookmark-button" className={`absolute top-2 right-2 w-8 h-8 rounded-full
-          bg-black/50 backdrop-blur-sm flex items-center justify-center
-          hover:bg-black/70 transition-colors
-          ${isBookmarked ? 'text-white' : 'text-white/60'}`}>
-          <Bookmark size={14} fill={isBookmarked ? 'currentColor' : 'none'} />
+
+        {/* Bookmark button — plus grand sur mobile */}
+        <button
+          data-testid="bookmark-button"
+          className={`absolute top-2 right-2
+            w-10 h-10 sm:w-8 sm:h-8
+            rounded-full bg-white/20 backdrop-blur-sm
+            flex items-center justify-center
+            hover:bg-white/30 transition-colors
+            ${isBookmarked ? 'text-white' : 'text-white/80'}`}
+        >
+          <Bookmark size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
         </button>
       </div>
-      <p className="text-white/40 text-xs mb-1">
-        {year} · ▪ {type} · {rating}
+
+      {/* Metadata */}
+      <p className="text-white/40 text-xs mb-1 flex items-center gap-1">
+        <span>{year}</span>
+        <span>·</span>
+        <span>▪</span>
+        <span>{type}</span>
+        <span>·</span>
+        <span>{rating}</span>
       </p>
+
+      {/* Title */}
       <p className="text-white text-sm font-medium leading-tight">{title}</p>
+
     </div>
   )
 }
