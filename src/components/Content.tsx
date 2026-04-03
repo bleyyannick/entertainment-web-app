@@ -2,8 +2,7 @@ import MovieCard from "./MovieCard"
 import EmptyState from "./EmptyState"
 import TrendingCarousel from "./TrendingCarousel"
 import { useMedia } from "../hooks/useMedia"
-import type { Media } from "../services/mediaService"
-import type { Section } from "./Navbar"
+import type { Media, Section } from "../types/media"
 
 interface ContentProps {
   query: string

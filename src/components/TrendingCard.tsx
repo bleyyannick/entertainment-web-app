@@ -1,4 +1,4 @@
-import type { Media } from '../services/mediaService'
+import type { Media } from '../types/media'
 
 interface TrendingCardProps {
   item: Media

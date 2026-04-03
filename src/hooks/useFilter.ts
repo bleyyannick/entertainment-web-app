@@ -1,5 +1,5 @@
 import { useState } from "react"
-import type { Section } from "../components/Navbar"
+import type { Section } from "../types/media"
 
 export function useFilter() {
   const [query, setQuery] = useState("")

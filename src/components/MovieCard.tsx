@@ -1,4 +1,4 @@
-import type { Thumbnail } from '../services/mediaService'
+import type { Thumbnail } from '../types/media'
 import BookmarkButton from './BookmarkButton'
 
 interface MovieCardProps {

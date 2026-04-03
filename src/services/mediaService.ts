@@ -1,39 +1,10 @@
-import type { Section } from "../components/Navbar"
+import type { Section, Thumbnail, Media } from "../types/media"
+import type { OmdbSearchResult, OmdbSearchResponse } from "../types/omdb"
 
-const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY as string
+export type { Thumbnail, Media }
+
+const OMDB_API_KEY  = import.meta.env.VITE_OMDB_API_KEY as string
 const OMDB_BASE_URL = "https://www.omdbapi.com"
-
-export interface Thumbnail {
-  small: string
-  medium: string
-  large: string
-}
-
-export interface Media {
-  id: number
-  title: string
-  thumbnail: Thumbnail
-  year: number
-  category: "Movie" | "TV Series"
-  rating: string
-  isBookmarked: boolean
-  isTrending: boolean
-}
-
-interface OmdbSearchResult {
-  Title: string
-  Year: string
-  imdbID: string
-  Type: string
-  Poster: string
-}
-
-interface OmdbSearchResponse {
-  Search?: OmdbSearchResult[]
-  totalResults?: string
-  Response: "True" | "False"
-  Error?: string
-}
 
 // Terme par défaut utilisé pour la navigation sans recherche explicite
 const DEFAULT_BROWSE_TERM = "the"

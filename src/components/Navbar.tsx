@@ -1,8 +1,9 @@
 import { type ComponentType } from "react"
 import { Grid, Film, Tv, Bookmark } from "lucide-react"
 import avatar from "../assets/images/image-avatar.png"
+import type { Section } from "../types/media"
 
-export type Section = "Home" | "Movies" | "TV Series" | "Bookmarks"
+export type { Section }
 
 const navItems: { label: Section; icon: ComponentType<{ size?: number; className?: string }> }[] = [
   { label: "Home",      icon: Grid     },

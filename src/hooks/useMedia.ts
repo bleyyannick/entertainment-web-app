@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { fetchMedia } from "../services/mediaService"
-import type { Section } from "../components/Navbar"
+import type { Section } from "../types/media"
 
 const FIVE_MINUTES = 5 * 60 * 1000
 const TEN_MINUTES  = 10 * 60 * 1000

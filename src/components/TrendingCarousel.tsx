@@ -1,6 +1,6 @@
 import { useRef } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import type { Media } from "../services/mediaService"
+import type { Media } from "../types/media"
 import TrendingCard from "./TrendingCard"
 
 interface TrendingCarouselProps {
