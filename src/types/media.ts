@@ -1,18 +1,9 @@
-export type Section = "Home" | "Movies" | "TV Series" | "Bookmarks"
-
-export interface Thumbnail {
-  small: string
-  medium: string
-  large: string
-}
+export type Section = "Home" | "Movies" | "TV Series"
 
 export interface Media {
   id: number
   title: string
-  thumbnail: Thumbnail
+  thumbnail: string
   year: number
   category: "Movie" | "TV Series"
-  rating: string
-  isBookmarked: boolean
-  isTrending: boolean
 }

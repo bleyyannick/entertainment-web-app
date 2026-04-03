@@ -1,7 +1,7 @@
-import type { Section, Thumbnail, Media } from "../types/media"
+import type { Section, Media } from "../types/media"
 import type { OmdbSearchResult, OmdbSearchResponse } from "../types/omdb"
 
-export type { Thumbnail, Media }
+export type { Media }
 
 const OMDB_API_KEY  = import.meta.env.VITE_OMDB_API_KEY as string
 const OMDB_BASE_URL = "https://www.omdbapi.com"
@@ -15,14 +15,11 @@ function normalizeOmdb(item: OmdbSearchResult, index: number): Media {
   const category: "Movie" | "TV Series" = item.Type === "series" ? "TV Series" : "Movie"
 
   return {
-    id:           index,
-    title:        item.Title,
-    thumbnail:    { small: poster, medium: poster, large: poster },
+    id:        index,
+    title:     item.Title,
+    thumbnail: poster,
     year,
     category,
-    rating:       "N/A",
-    isBookmarked: false,
-    isTrending:   false,
   }
 }
 
@@ -60,7 +57,6 @@ export async function fetchAll(query: string): Promise<Media[]> {
 }
 
 export async function fetchMedia(section: Section, query: string): Promise<Media[]> {
-  if (section === "Bookmarks") return []
   if (section === "Movies")    return fetchMovies(query)
   if (section === "TV Series") return fetchSeries(query)
   return fetchAll(query)

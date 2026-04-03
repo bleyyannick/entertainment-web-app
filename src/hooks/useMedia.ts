@@ -9,7 +9,7 @@ export function useMedia(section: Section, query: string) {
   return useQuery({
     queryKey: ["media", section, query],
     queryFn:  () => fetchMedia(section, query),
-    enabled:  section !== "Bookmarks" && (section !== "Home" || !!query.trim()),
+    enabled:  section !== "Home" || !!query.trim(),
     // Les résultats OMDB sont stables : pas de refetch pendant 5 min pour la même clé
     staleTime: FIVE_MINUTES,
     // Garder le cache 10 min après que le composant se démonte

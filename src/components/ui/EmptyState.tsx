@@ -2,20 +2,9 @@ import { SearchX, Search } from "lucide-react"
 
 interface EmptyStateProps {
   query?: string
-  isBookmarks?: boolean
 }
 
-export default function EmptyState({ query, isBookmarks }: EmptyStateProps) {
-  if (isBookmarks) {
-    return (
-      <div data-testid="empty-state" className="flex flex-col items-center justify-center py-24 text-white/30">
-        <SearchX size={48} className="mb-4" />
-        <p className="text-lg font-medium">Aucun contenu dans votre liste.</p>
-        <p className="text-sm mt-1">Ajoutez des films ou séries depuis la recherche.</p>
-      </div>
-    )
-  }
-
+export default function EmptyState({ query }: EmptyStateProps) {
   if (!query) {
     return (
       <div data-testid="empty-state" className="flex flex-col items-center justify-center py-24 text-white/30">
