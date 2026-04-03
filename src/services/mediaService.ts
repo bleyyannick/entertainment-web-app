@@ -1,19 +1,7 @@
 import type { Section } from "../components/Navbar"
 
-interface RawThumbnail {
-  trending?: { small: string; large: string }
-  regular: { small: string; medium: string; large: string }
-}
-
-interface RawMedia {
-  title: string
-  thumbnail: RawThumbnail
-  year: number
-  category: "Movie" | "TV Series"
-  rating: string
-  isBookmarked: boolean
-  isTrending: boolean
-}
+const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY as string
+const OMDB_BASE_URL = "https://www.omdbapi.com"
 
 export interface Thumbnail {
   small: string
@@ -32,61 +20,77 @@ export interface Media {
   isTrending: boolean
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL as string
-const IS_LOCAL = BASE_URL.endsWith(".json")
+interface OmdbSearchResult {
+  Title: string
+  Year: string
+  imdbID: string
+  Type: string
+  Poster: string
+}
 
-function normalize(raw: RawMedia, index: number): Media {
+interface OmdbSearchResponse {
+  Search?: OmdbSearchResult[]
+  totalResults?: string
+  Response: "True" | "False"
+  Error?: string
+}
+
+// Terme par défaut utilisé pour la navigation sans recherche explicite
+const DEFAULT_BROWSE_TERM = "the"
+
+function normalizeOmdb(item: OmdbSearchResult, index: number): Media {
+  const poster = item.Poster !== "N/A" ? item.Poster : ""
+  const year = parseInt(item.Year, 10) || 0
+  const category: "Movie" | "TV Series" = item.Type === "series" ? "TV Series" : "Movie"
+
   return {
     id:           index,
-    title:        raw.title,
-    thumbnail: {
-      small:  raw.thumbnail.regular.small,
-      medium: raw.thumbnail.regular.medium,
-      large:  raw.thumbnail.regular.large,
-    },
-    year:         raw.year,
-    category:     raw.category,
-    rating:       raw.rating,
-    isBookmarked: raw.isBookmarked,
-    isTrending:   raw.isTrending,
+    title:        item.Title,
+    thumbnail:    { small: poster, medium: poster, large: poster },
+    year,
+    category,
+    rating:       "N/A",
+    isBookmarked: false,
+    isTrending:   false,
   }
 }
 
-function buildUrl(section: Section, query: string): string {
-  if (IS_LOCAL) return BASE_URL
+async function omdbFetch(searchTerm: string, type?: string): Promise<Media[]> {
+  const params = new URLSearchParams({ apikey: OMDB_API_KEY, s: searchTerm })
+  if (type) params.set("type", type)
 
-  const params = new URLSearchParams()
-  if (section !== "Home") params.set("section", section)
-  if (query.trim())       params.set("q", query)
-
-  const qs = params.toString()
-  return qs ? `${BASE_URL}?${qs}` : BASE_URL
-}
-
-export async function fetchMedia(section: Section, query: string): Promise<Media[]> {
-  const response = await fetch(buildUrl(section, query))
+  const response = await fetch(`${OMDB_BASE_URL}/?${params.toString()}`)
 
   if (!response.ok) {
     throw new Error(`Failed to fetch media: ${response.statusText}`)
   }
 
-  const raw: RawMedia[] = await response.json() as RawMedia[]
-  let results = raw.map(normalize)
+  const data = await response.json() as OmdbSearchResponse
 
-  // Filtrage client uniquement en dev (fallback JSON)
-  if (IS_LOCAL) {
-    if (section === "Bookmarks") {
-      results = results.filter((m) => m.isBookmarked)
-    } else if (section !== "Home") {
-      results = results.filter((m) =>
-        section === "Movies" ? m.category === "Movie" : m.category === "TV Series"
-      )
-    }
-    if (query.trim()) {
-      const q = query.toLowerCase()
-      results = results.filter((m) => m.title.toLowerCase().includes(q))
-    }
-  }
+  if (data.Response === "False") return []
 
-  return results
+  return (data.Search ?? []).map(normalizeOmdb)
+}
+
+/** Films — s'appelle avec ou sans query. Sans query, affiche du contenu par défaut. */
+export async function fetchMovies(query: string): Promise<Media[]> {
+  return omdbFetch(query.trim() || DEFAULT_BROWSE_TERM, "movie")
+}
+
+/** Séries — s'appelle avec ou sans query. Sans query, affiche du contenu par défaut. */
+export async function fetchSeries(query: string): Promise<Media[]> {
+  return omdbFetch(query.trim() || DEFAULT_BROWSE_TERM, "series")
+}
+
+/** Recherche globale (Home) — nécessite une query, retourne films + séries. */
+export async function fetchAll(query: string): Promise<Media[]> {
+  if (!query.trim()) return []
+  return omdbFetch(query.trim())
+}
+
+export async function fetchMedia(section: Section, query: string): Promise<Media[]> {
+  if (section === "Bookmarks") return []
+  if (section === "Movies")    return fetchMovies(query)
+  if (section === "TV Series") return fetchSeries(query)
+  return fetchAll(query)
 }

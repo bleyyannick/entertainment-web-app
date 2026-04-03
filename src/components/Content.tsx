@@ -81,7 +81,7 @@ export default function Content({ query, activeSection }: ContentProps) {
       </h1>
 
       {!media || media.length === 0 ? (
-        <EmptyState query={query} />
+        <EmptyState query={query} isBookmarks={activeSection === "Bookmarks"} />
       ) : (
         <MediaGrid media={media} />
       )}
