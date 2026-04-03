@@ -1,4 +1,4 @@
-import iconSearch from "../assets/images/icon-search.svg"
+import iconSearch from "../../assets/images/icon-search.svg"
 
 interface SearchBarProps {
   value: string

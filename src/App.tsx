@@ -1,7 +1,7 @@
 
 import './App.css'
-import Navbar from './components/Navbar'
-import SearchBar from './components/SearchBar'
+import Navbar from './components/layout/Navbar'
+import SearchBar from './components/ui/SearchBar'
 import Content from './components/Content'
 import { useFilter } from './hooks/useFilter'
 

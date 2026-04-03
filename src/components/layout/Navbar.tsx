@@ -1,52 +1,20 @@
 import { type ComponentType } from "react"
-import { Grid, Film, Tv, Bookmark } from "lucide-react"
-import avatar from "../assets/images/image-avatar.png"
+import { Grid, Film, Tv } from "lucide-react"
+import type { Section } from "../../types/media"
+import NavButton from "./NavButton"
+import NavAvatar from "./NavAvatar"
 
-export type Section = "Home" | "Movies" | "TV Series" | "Bookmarks"
+export type { Section }
 
 const navItems: { label: Section; icon: ComponentType<{ size?: number; className?: string }> }[] = [
-  { label: "Home",      icon: Grid     },
-  { label: "Movies",    icon: Film     },
-  { label: "TV Series", icon: Tv       },
-  { label: "Bookmarks", icon: Bookmark },
+  { label: "Home",      icon: Grid },
+  { label: "Movies",    icon: Film },
+  { label: "TV Series", icon: Tv   },
 ]
 
 interface NavbarProps {
   activeSection: Section
   onSectionChange: (section: Section) => void
-}
-
-interface NavButtonProps {
-  label: Section
-  icon: ComponentType<{ size?: number; className?: string }>
-  isActive: boolean
-  variant: 'header' | 'sidebar'
-  onSelect: (section: Section) => void
-}
-
-function NavButton({ label, icon: Icon, isActive, variant, onSelect }: NavButtonProps) {
-  return (
-    <button
-      aria-label={label}
-      aria-current={isActive ? "page" : undefined}
-      onClick={() => onSelect(label)}
-      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors
-        ${isActive
-          ? variant === 'sidebar' ? 'bg-white/10 text-white' : 'text-white'
-          : 'text-white/30 hover:text-white/60'
-        }`}
-    >
-      <Icon size={18} />
-    </button>
-  )
-}
-
-function NavAvatar({ border }: { border: string }) {
-  return (
-    <div className={`rounded-full bg-gray-600 overflow-hidden ${border}`}>
-      <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
-    </div>
-  )
 }
 
 export default function Navbar({ activeSection, onSectionChange }: NavbarProps) {
