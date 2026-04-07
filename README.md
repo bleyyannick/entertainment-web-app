@@ -6,7 +6,16 @@ Projet issu du challenge [Frontend Mentor — Entertainment Web App](https://www
 
 - Explorer le pair-programming avec un assistant IA (GitHub Copilot) sur un projet React concret.
 - Mettre en pratique des bonnes pratiques : architecture en feature folders, typage strict TypeScript, composants atomiques, commits Conventional Commits, etc.
-- Consommer une API externe ([OMDb API](https://www.omdbapi.com/)) en gérant les états de chargement et d'erreur.
+- Consommer une API externe ([OMDb API](https://www.omdbapi.com/)) via un proxy backend sécurisé.
+
+## Structure du dépôt
+
+```
+entertainement-web-app/
+├── frontend/   # Application React + Vite
+├── backend/    # Proxy Express + TypeScript (appels OMDb sécurisés)
+└── README.md
+```
 
 ## Stack technique
 
@@ -18,11 +27,12 @@ Projet issu du challenge [Frontend Mentor — Entertainment Web App](https://www
 | TanStack Query v5 | Data fetching & cache |
 | Lucide React | Icônes |
 | React Compiler | Optimisation automatique des re-renders |
+| Express + TypeScript | Proxy backend (Node.js) |
 
 ## Architecture des composants
 
 ```
-src/components/
+frontend/src/components/
 ├── layout/     # Navbar, NavButton, NavAvatar
 ├── media/      # MediaGrid, MovieCard
 └── ui/         # SearchBar, EmptyState, ContentLoader, ContentError
@@ -30,14 +40,19 @@ src/components/
 
 ## Décisions techniques
 
+### Proxy backend
+La clé API OMDb réside exclusivement côté serveur dans le backend Express. Le frontend n'envoie plus la clé dans ses requêtes : il interroge uniquement le proxy (`/api/search`), qui est le seul à communiquer avec OMDb — la clé n'est jamais exposée dans le bundle JavaScript.
+
+L'endpoint unique `GET /api/search?q=...&type=movie|series` centralise toute la logique d'accès à l'API externe et valide les paramètres en entrée.
+
 ### React Compiler
 Le React Compiler (expérimental) est activé via Babel. L'objectif est de se familiariser avec les prochaines versions de React qui l'intègreront nativement. Il analyse le code à la compilation et insère automatiquement la mémoïsation là où elle est nécessaire — sans avoir à écrire manuellement `useMemo` ou `useCallback`.
 
 ### Cache TanStack Query
-Chaque requête OMDb est mise en cache avec un `staleTime` de 5 minutes et un `gcTime` de 10 minutes. Cela évite les appels HTTP redondants lors de la navigation entre sections ou d'une recherche identique, ce qui améliore les performances réseau et offre une expérience utilisateur plus fluide (pas de rechargement inutile).
+Chaque requête est mise en cache avec un `staleTime` de 5 minutes et un `gcTime` de 10 minutes. Cela évite les appels HTTP redondants lors de la navigation entre sections ou d'une recherche identique, ce qui améliore les performances réseau et offre une expérience utilisateur plus fluide.
 
 ### Couche service (`mediaService.ts`)
-La logique de récupération et de normalisation des données est isolée dans un service dédié. Les composants se concentrent uniquement sur le rendu, ce qui rend le code plus lisible, plus maintenable et plus facilement testable unitairement.
+La logique de récupération des données est isolée dans un service dédié. Les composants se concentrent uniquement sur le rendu, ce qui rend le code plus lisible, plus maintenable et plus facilement testable unitairement.
 
 ## Démarrage
 
@@ -49,49 +64,61 @@ La logique de récupération et de normalisation des données est isolée dans u
 ### Installation
 
 ```bash
-npm install
+cd frontend && npm install
+cd ../backend && npm install
 ```
 
 ### Variables d'environnement
 
-Créer un fichier `.env` à la racine :
-
+**Backend** — créer `backend/.env` :
 ```env
-VITE_OMDB_API_KEY=votre_clé_api
+OMDB_API_KEY=votre_clé_api
+PORT=3001
+FRONTEND_URL=http://localhost:5173
 ```
+
+**Frontend** — `frontend/.env.development` est déjà configuré pour pointer vers `http://localhost:3001`.
 
 ### Lancer en développement
 
+Dans deux terminaux séparés :
+
 ```bash
-npm run dev
+# Terminal 1 — backend
+cd backend && npm run dev
+
+# Terminal 2 — frontend
+cd frontend && npm run dev
 ```
 
-L'application est disponible sur [http://localhost:5173](http://localhost:5173).
+Le frontend est disponible sur [http://localhost:5173](http://localhost:5173).
 
 ### Build de production
 
 ```bash
-npm run build
-npm run preview   # pour prévisualiser le build localement
+cd frontend && npm run build
+cd frontend && npm run preview   # prévisualiser le build localement
 ```
 
 ### Lint
 
 ```bash
-npm run lint
+cd frontend && npm run lint
 ```
 
 ## Points d'amélioration connus
 
-### Sécurisation de la clé API
-Actuellement, la clé OMDb est injectée via une variable d'environnement Vite (`VITE_*`). Ces variables sont **embarquées dans le bundle JavaScript** lors du build et donc visibles dans les outils de développement du navigateur — une variable d'environnement côté client ne protège pas réellement une clé.
-
-La solution envisagée est d'introduire un **proxy serveur** (ex. une Edge Function Netlify, un Worker Cloudflare, ou un endpoint Express) qui effectuerait les appels OMDb côté serveur. Le client n'enverrait plus la clé dans ses requêtes : il interrogerait uniquement le proxy, qui serait le seul à détenir le secret.
+### Architecture du backend (SOLID)
+Le proxy Express fonctionne mais peut être renforcé en appliquant les principes SOLID : séparation claire des responsabilités entre le routeur, la logique métier et l'accès à l'API externe, injection de dépendances pour faciliter les tests unitaires du service OMDb, etc.
 
 ### Tests
-Le projet ne dispose pas encore de tests automatisés. La couche service (`mediaService.ts`) étant découplée des composants, elle constitue un point d'entrée naturel pour des **tests unitaires** (normalisation des données OMDb, gestion des cas limites). Les composants UI pourraient quant à eux être couverts par des **tests de rendu** avec Vitest + React Testing Library.
+Le projet ne dispose pas encore de tests automatisés. La couche service (`mediaService.ts` côté backend) étant découplée du reste, elle constitue un point d'entrée naturel pour des **tests unitaires** (normalisation des données OMDb, gestion des cas limites). Les composants UI pourraient être couverts par des **tests de rendu** avec Vitest + React Testing Library.
 
 ## Déploiement
 
-L'application est déployée sur GitHub Pages :
-[https://bleyyannick.github.io/entertainment-web-app/](https://bleyyannick.github.io/entertainment-web-app/)
+Le frontend (statique) peut être hébergé sur GitHub Pages ou tout CDN.
+Le backend nécessite un hébergeur Node.js (ex. [Render](https://render.com), [Railway](https://railway.app)).
+
+Penser à mettre à jour `VITE_API_BASE_URL` dans `frontend/.env.production` avec l'URL du backend déployé.
+
+Frontend déployé : [https://bleyyannick.github.io/entertainment-web-app/](https://bleyyannick.github.io/entertainment-web-app/)
