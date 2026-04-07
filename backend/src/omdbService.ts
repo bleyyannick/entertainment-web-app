@@ -1,0 +1,39 @@
+import type { OmdbSearchResult, OmdbSearchResponse, Media } from "./types.js"
+
+const OMDB_API_KEY = process.env.OMDB_API_KEY
+const OMDB_BASE_URL = "https://www.omdbapi.com"
+const DEFAULT_BROWSE_TERM = "the"
+
+function normalizeOmdb(item: OmdbSearchResult, index: number): Media {
+  const poster = item.Poster !== "N/A" ? item.Poster : ""
+  const year = parseInt(item.Year, 10) || 0
+  const category: "Movie" | "TV Series" = item.Type === "series" ? "TV Series" : "Movie"
+
+  return {
+    id: index,
+    title: item.Title,
+    thumbnail: poster,
+    year,
+    category,
+  }
+}
+
+export async function searchOmdb(query: string, type?: "movie" | "series"): Promise<Media[]> {
+  if (!OMDB_API_KEY) throw new Error("OMDB_API_KEY is not set")
+
+  const term = query.trim() || DEFAULT_BROWSE_TERM
+  const params = new URLSearchParams({ apikey: OMDB_API_KEY, s: term })
+  if (type) params.set("type", type)
+
+  const response = await fetch(`${OMDB_BASE_URL}/?${params.toString()}`)
+
+  if (!response.ok) {
+    throw new Error(`OMDb API error: ${response.statusText}`)
+  }
+
+  const data = (await response.json()) as OmdbSearchResponse
+
+  if (data.Response === "False") return []
+
+  return (data.Search ?? []).map(normalizeOmdb)
+}
