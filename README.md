@@ -5,7 +5,7 @@ Projet issu du challenge [Frontend Mentor — Entertainment Web App](https://www
 ## Objectifs du projet
 
 - Explorer le pair-programming avec un assistant IA (GitHub Copilot) sur un projet React concret.
-- Mettre en pratique des bonnes pratiques : architecture en feature folders, typage strict TypeScript, composants atomiques, commits Conventional Commits, etc.
+- Mettre en pratique des bonnes pratiques : architecture en couches (components/hooks/services/types), typage strict TypeScript, composants atomiques, commits Conventional Commits, etc.
 - Consommer une API externe ([OMDb API](https://www.omdbapi.com/)) via un proxy backend sécurisé.
 
 ## Structure du dépôt
@@ -33,9 +33,10 @@ entertainement-web-app/
 
 ```
 frontend/src/components/
-├── layout/     # Navbar, NavButton, NavAvatar
-├── media/      # MediaGrid, MovieCard
-└── ui/         # SearchBar, EmptyState, ContentLoader, ContentError
+├── Content.tsx    # Orchestrateur : data-fetching + rendu conditionnel
+├── layout/        # Navbar, NavButton, NavAvatar
+├── media/         # MediaGrid, MovieCard
+└── ui/            # SearchBar, EmptyState, ContentLoader, ContentError
 ```
 
 ## Décisions techniques
@@ -46,7 +47,7 @@ La clé API OMDb réside exclusivement côté serveur dans le backend Express. L
 L'endpoint unique `GET /api/search?q=...&type=movie|series` centralise toute la logique d'accès à l'API externe et valide les paramètres en entrée.
 
 ### React Compiler
-Le React Compiler (expérimental) est activé via Babel. L'objectif est de se familiariser avec les prochaines versions de React qui l'intègreront nativement. Il analyse le code à la compilation et insère automatiquement la mémoïsation là où elle est nécessaire — sans avoir à écrire manuellement `useMemo` ou `useCallback`.
+Le React Compiler (stable depuis la v1.0 de `babel-plugin-react-compiler`) est activé via Babel. L'objectif est de se familiariser avec les prochaines versions de React qui l'intègreront nativement. Il analyse le code à la compilation et insère automatiquement la mémoïsation là où elle est nécessaire — sans avoir à écrire manuellement `useMemo` ou `useCallback`.
 
 ### Cache TanStack Query
 Chaque requête est mise en cache avec un `staleTime` de 5 minutes et un `gcTime` de 10 minutes. Cela évite les appels HTTP redondants lors de la navigation entre sections ou d'une recherche identique, ce qui améliore les performances réseau et offre une expérience utilisateur plus fluide.
@@ -112,13 +113,15 @@ cd frontend && npm run lint
 Le proxy Express fonctionne mais peut être renforcé en appliquant les principes SOLID : séparation claire des responsabilités entre le routeur, la logique métier et l'accès à l'API externe, injection de dépendances pour faciliter les tests unitaires du service OMDb, etc.
 
 ### Tests
-Le projet ne dispose pas encore de tests automatisés. La couche service (`mediaService.ts` côté backend) étant découplée du reste, elle constitue un point d'entrée naturel pour des **tests unitaires** (normalisation des données OMDb, gestion des cas limites). Les composants UI pourraient être couverts par des **tests de rendu** avec Vitest + React Testing Library.
+Le projet ne dispose pas encore de tests automatisés. La couche service (`omdbService.ts` côté backend) étant découplée du reste, elle constitue un point d'entrée naturel pour des **tests unitaires** (normalisation des données OMDb, gestion des cas limites). Les composants UI pourraient être couverts par des **tests de rendu** avec Vitest + React Testing Library.
 
 ## Déploiement
 
-Le frontend (statique) peut être hébergé sur GitHub Pages ou tout CDN.
-Le backend nécessite un hébergeur Node.js (ex. [Render](https://render.com), [Railway](https://railway.app)).
+| Service | Hébergeur | URL |
+|---|---|---|
+| Frontend (statique) | GitHub Pages | [bleyyannick.github.io/entertainment-web-app](https://bleyyannick.github.io/entertainment-web-app/) |
+| Backend (proxy Node.js) | Railway | `https://entertainment-web-app-production-9f90.up.railway.app` |
 
-Penser à mettre à jour `VITE_API_BASE_URL` dans `frontend/.env.production` avec l'URL du backend déployé.
+Le déploiement du frontend est automatisé via GitHub Actions (`.github/workflows/deploy.yml`) : tout push sur `main` ou `deployment` déclenche un build puis un déploiement sur GitHub Pages. La variable `BASE_PATH` est injectée automatiquement par le workflow pour que Vite génère les bons chemins d'assets.
 
-Frontend déployé : [https://bleyyannick.github.io/entertainment-web-app/](https://bleyyannick.github.io/entertainment-web-app/)
+`frontend/.env.production` contient l'URL du backend Railway — aucune configuration supplémentaire n'est nécessaire pour un build de production.
