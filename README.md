@@ -107,13 +107,59 @@ cd frontend && npm run preview   # prévisualiser le build localement
 cd frontend && npm run lint
 ```
 
+### Tests
+
+Les tests sont automatiquement exécutés dans la CI GitHub Actions à chaque push sur `main` ou `deployment`, avant le lint et le build — le déploiement est bloqué en cas d'échec.
+
+Chaque couche dispose de sa propre suite Vitest :
+
+```bash
+# Backend
+cd backend && npm run test          # exécution unique
+cd backend && npm run test:watch    # mode watch
+
+# Frontend
+cd frontend && npm run test         # exécution unique
+cd frontend && npm run test:watch   # mode watch
+```
+
+## Architecture des tests
+
+```
+backend/src/__tests__/
+├── unit/
+│   └── omdbService.test.ts    # searchOmdb — logique de normalisation OMDb
+└── integration/               # réservé (tests HTTP à venir)
+
+frontend/src/__tests__/
+├── unit/
+│   └── mediaService.test.ts   # fetchMovies, fetchSeries, fetchAll, fetchMedia
+└── integration/               # réservé (tests composants à venir)
+```
+
+### Couverture actuelle
+
+**Backend — `omdbService.ts`** (`searchOmdb`) :
+- Lève une erreur si `OMDB_API_KEY` est absente de l'environnement
+- Fonctionne avec une query vide ou renseignée
+- Retourne `[]` si OMDb répond `Response: "False"`
+- Lève une erreur si la requête réseau échoue
+- Normalise le type OMDb : `movie` → catégorie `"Movie"`, `series` → `"TV Series"`
+- Remplace le poster `"N/A"` par une chaîne vide
+
+**Frontend — `mediaService.ts`** (`fetchMovies`, `fetchSeries`, `fetchAll`, `fetchMedia`) :
+- Retourne les médias renvoyés par le proxy backend
+- Lève une erreur si la réponse réseau est en échec
+- `fetchAll` retourne `[]` si la query est vide ou ne contient que des espaces
+- `fetchMedia` délègue vers la bonne fonction selon la section active (`Movies`, `TV Series`, `Home`)
+
 ## Points d'amélioration connus
 
 ### Architecture du backend (SOLID)
 Le proxy Express fonctionne mais peut être renforcé en appliquant les principes SOLID : séparation claire des responsabilités entre le routeur, la logique métier et l'accès à l'API externe, injection de dépendances pour faciliter les tests unitaires du service OMDb, etc.
 
 ### Tests
-Le projet ne dispose pas encore de tests automatisés. La couche service (`omdbService.ts` côté backend) étant découplée du reste, elle constitue un point d'entrée naturel pour des **tests unitaires** (normalisation des données OMDb, gestion des cas limites). Les composants UI pourraient être couverts par des **tests de rendu** avec Vitest + React Testing Library.
+Les tests unitaires sont en place sur les deux couches service (frontend et backend). Les dossiers `integration/` sont réservés pour de futurs tests HTTP (backend) et tests de rendu composant (frontend, avec React Testing Library).
 
 ## Déploiement
 
