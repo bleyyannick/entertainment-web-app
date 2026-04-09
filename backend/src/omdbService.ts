@@ -1,4 +1,5 @@
-import type { OmdbSearchResult, OmdbSearchResponse, Media } from "./types.js"
+import type { OmdbSearchResult, Media } from "./types.js"
+import { OmdbSearchResponseSchema } from "./types.js"
 
 const OMDB_API_KEY = process.env.OMDB_API_KEY
 const OMDB_BASE_URL = "https://www.omdbapi.com"
@@ -31,7 +32,14 @@ export async function searchOmdb(query: string, type?: "movie" | "series"): Prom
     throw new Error(`OMDb API error: ${response.statusText}`)
   }
 
-  const data = (await response.json()) as OmdbSearchResponse
+  const raw = await response.json()
+  const parsed = OmdbSearchResponseSchema.safeParse(raw)
+
+  if (!parsed.success) {
+    throw new Error(`Réponse OMDB invalide : ${parsed.error.message}`)
+  }
+
+  const data = parsed.data
 
   if (data.Response === "False") return []
 

@@ -1,13 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import type { OmdbSearchResponse } from "../../types.js"
+import { createOmdbSearchResponse } from "../factories/omdbFactory.js"
 
-const mockOmdbResponse: OmdbSearchResponse = {
-  Response: "True",
-  Search: [
-    { Title: "Inception", Year: "2010", imdbID: "tt1375666", Type: "movie", Poster: "https://poster.jpg" },
-    { Title: "Breaking Bad", Year: "2008", imdbID: "tt0903747", Type: "series", Poster: "N/A" },
-  ],
-}
+const mockOmdbResponse = createOmdbSearchResponse()
 
 beforeEach(() => {
   process.env.OMDB_API_KEY = "test-api-key"
