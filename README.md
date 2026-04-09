@@ -28,6 +28,7 @@ entertainement-web-app/
 | Lucide React | Icônes |
 | React Compiler | Optimisation automatique des re-renders |
 | Express + TypeScript | Proxy backend (Node.js) |
+| Zod v4 | Validation des schémas à l'exécution (frontend + backend) |
 
 ## Architecture des composants
 
@@ -51,6 +52,15 @@ Le React Compiler (stable depuis la v1.0 de `babel-plugin-react-compiler`) est a
 
 ### Cache TanStack Query
 Chaque requête est mise en cache avec un `staleTime` de 5 minutes et un `gcTime` de 10 minutes. Cela évite les appels HTTP redondants lors de la navigation entre sections ou d'une recherche identique, ce qui améliore les performances réseau et offre une expérience utilisateur plus fluide.
+
+### Validation des données avec Zod
+Les types `Media` (frontend) et `OmdbSearchResult` / `OmdbSearchResponse` (backend) ne sont plus de simples interfaces TypeScript : ils sont définis comme des **schémas Zod**, et les types TypeScript en sont **inférés** via `z.infer<>`. Cette approche garantit une cohérence totale entre la validation à l'exécution et le typage statique.
+
+Chaque réponse API est validée au runtime au point d'entrée des données :
+- côté **backend**, `omdbService.ts` utilise `safeParse` pour vérifier la réponse OMDb avant tout traitement ;
+- côté **frontend**, `mediaService.ts` utilise `z.array(MediaSchema).parse(data)` pour valider la réponse du proxy.
+
+Toute donnée malformée provoque immédiatement une erreur explicite, avant qu'elle ne se propage dans l'application.
 
 ### Couche service (`mediaService.ts`)
 La logique de récupération des données est isolée dans un service dédié. Les composants se concentrent uniquement sur le rendu, ce qui rend le code plus lisible, plus maintenable et plus facilement testable unitairement.
@@ -127,15 +137,22 @@ cd frontend && npm run test:watch   # mode watch
 
 ```
 backend/src/__tests__/
+├── factories/
+│   └── omdbFactory.ts         # createOmdbSearchResult, createOmdbSearchResponse
 ├── unit/
 │   └── omdbService.test.ts    # searchOmdb — logique de normalisation OMDb
 └── integration/               # réservé (tests HTTP à venir)
 
 frontend/src/__tests__/
+├── factories/
+│   └── mediaFactory.ts        # createMedia
 ├── unit/
 │   └── mediaService.test.ts   # fetchMovies, fetchSeries, fetchAll, fetchMedia
 └── integration/               # réservé (tests composants à venir)
 ```
+
+### Factories de test
+Plutôt que de définir des fixtures statiques dans chaque fichier de test, les données de test sont générées via des **fonctions factory** (`createMedia`, `createOmdbSearchResult`, `createOmdbSearchResponse`). Chaque factory retourne un objet valide avec des valeurs par défaut réalistes, surchargeable par `overrides`. Ce pattern réduit la duplication, facilite la création de cas variés, et découple les tests de la structure exacte des types.
 
 ### Couverture actuelle
 
@@ -144,6 +161,7 @@ frontend/src/__tests__/
 - Fonctionne avec une query vide ou renseignée
 - Retourne `[]` si OMDb répond `Response: "False"`
 - Lève une erreur si la requête réseau échoue
+- Lève une erreur si la réponse OMDb ne respecte pas le schéma Zod attendu
 - Normalise le type OMDb : `movie` → catégorie `"Movie"`, `series` → `"TV Series"`
 - Remplace le poster `"N/A"` par une chaîne vide
 
