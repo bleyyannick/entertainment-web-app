@@ -1,4 +1,6 @@
+import { MediaSchema } from "../types/media"
 import type { Section, Media } from "../types/media"
+import { z } from "zod"
 
 export type { Media }
 
@@ -14,7 +16,8 @@ async function apiFetch(query: string, type?: "movie" | "series"): Promise<Media
     throw new Error(`Failed to fetch media: ${response.statusText}`)
   }
 
-  return response.json() as Promise<Media[]>
+  const data = await response.json()
+  return z.array(MediaSchema).parse(data)
 }
 
 /** Films — s'appelle avec ou sans query. */

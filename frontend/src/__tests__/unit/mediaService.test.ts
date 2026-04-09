@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { fetchMovies, fetchSeries, fetchAll, fetchMedia } from "../../services/mediaService"
-import type { Media } from "../../types/media"
+import { createMedia } from "../factories/mediaFactory"
 
-const mockMedia: Media[] = [
-  { id: 0, title: "Inception", thumbnail: "https://img.jpg", year: 2010, category: "Movie" },
-  { id: 1, title: "Breaking Bad", thumbnail: "https://img2.jpg", year: 2008, category: "TV Series" },
+const mockMedia = [
+  createMedia(),
+  createMedia({ id: 1, title: "Breaking Bad", thumbnail: "https://img2.jpg", year: 2008, category: "TV Series" }),
 ]
 
 beforeEach(() => {

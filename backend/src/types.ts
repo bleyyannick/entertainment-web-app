@@ -1,17 +1,22 @@
-export interface OmdbSearchResult {
-  Title: string
-  Year: string
-  imdbID: string
-  Type: string
-  Poster: string
-}
+import { z } from "zod"
 
-export interface OmdbSearchResponse {
-  Search?: OmdbSearchResult[]
-  totalResults?: string
-  Response: "True" | "False"
-  Error?: string
-}
+export const OmdbSearchResultSchema = z.object({
+  Title: z.string(),
+  Year: z.string(),
+  imdbID: z.string(),
+  Type: z.string(),
+  Poster: z.string(),
+})
+
+export const OmdbSearchResponseSchema = z.object({
+  Response: z.enum(["True", "False"]),
+  Search: z.array(OmdbSearchResultSchema).optional(),
+  totalResults: z.string().optional(),
+  Error: z.string().optional(),
+})
+
+export type OmdbSearchResult = z.infer<typeof OmdbSearchResultSchema>
+export type OmdbSearchResponse = z.infer<typeof OmdbSearchResponseSchema>
 
 export interface Media {
   id: number
