@@ -3,14 +3,9 @@ import iconSearch from "../../assets/images/icon-search.svg"
 interface SearchBarProps {
   value: string
   onChange: (value: string) => void
-  placeholder?: string
 }
 
-export default function SearchBar({
-  value,
-  onChange,
-  placeholder = "Search for movies or TV series",
-}: SearchBarProps) {
+export default function SearchBar({ value, onChange }: SearchBarProps) {
   return (
     <search className="flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-4">
 
@@ -31,7 +26,7 @@ export default function SearchBar({
         role="searchbox"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder="Search for movies or TV series"
         autoComplete="off"
         data-testid="search-input"
         className="bg-transparent text-white/80 placeholder:text-white/30
