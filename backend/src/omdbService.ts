@@ -19,12 +19,13 @@ function normalizeOmdb(item: OmdbSearchResult, index: number): Media {
   }
 }
 
-export async function searchOmdb(query: string, type?: "movie" | "series"): Promise<Media[]> {
+export async function searchOmdb(query: string, type?: "movie" | "series", year?: number): Promise<Media[]> {
   if (!OMDB_API_KEY) throw new Error("OMDB_API_KEY is not set")
 
   const term = query.trim() || DEFAULT_BROWSE_TERM
   const params = new URLSearchParams({ apikey: OMDB_API_KEY, s: term })
   if (type) params.set("type", type)
+  if (year) params.set("y", String(year))
 
   const response = await fetch(`${OMDB_BASE_URL}/?${params.toString()}`)
 

@@ -5,10 +5,10 @@ import type { Section } from "../types/media"
 const FIVE_MINUTES = 5 * 60 * 1000
 const TEN_MINUTES  = 10 * 60 * 1000
 
-export function useMedia(section: Section, query: string) {
+export function useMedia(section: Section, query: string, year?: number) {
   return useQuery({
-    queryKey: ["media", section, query],
-    queryFn:  () => fetchMedia(section, query),
+    queryKey: ["media", section, query, year],
+    queryFn:  () => fetchMedia(section, query, year),
     enabled:  section !== "Home" || !!query.trim(),
     // Les résultats OMDB sont stables : pas de refetch pendant 5 min pour la même clé
     staleTime: FIVE_MINUTES,
