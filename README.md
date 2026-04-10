@@ -1,12 +1,16 @@
 # Entertainment Web App
 
-Projet issu du challenge [Frontend Mentor — Entertainment Web App](https://www.frontendmentor.io/challenges/entertainment-web-app-J-UhgAW1X), utilisé comme terrain d'expérimentation pour le **développement assisté par IA** (GitHub Copilot) en appliquant de bonnes pratiques de développement front-end.
+Application web de catalogue de films et séries, permettant de rechercher, filtrer et parcourir des contenus via l'[API OMDb](https://www.omdbapi.com/). Le frontend React communique exclusivement avec un proxy backend Express qui centralise les appels à l'API externe et protège la clé API.
 
-## Objectifs du projet
+## Fonctionnalités
 
-- Explorer le pair-programming avec un assistant IA (GitHub Copilot) sur un projet React concret.
-- Mettre en pratique des bonnes pratiques : architecture en couches (components/hooks/services/types), typage strict TypeScript, composants atomiques, commits Conventional Commits, etc.
-- Consommer une API externe ([OMDb API](https://www.omdbapi.com/)) via un proxy backend sécurisé.
+- Recherche en temps réel avec debounce
+- Navigation par section : Accueil, Films, Séries
+- Filtrage par année de sortie
+- Tri par date (plus récent / plus ancien)
+- Architecture en couches : composants, hooks, services, types
+
+> Développé avec l'assistance de GitHub Copilot. Les décisions techniques, choix d'architecture et orientations du projet restent entièrement les miens.
 
 ## Structure du dépôt
 
@@ -37,7 +41,13 @@ frontend/src/components/
 ├── Content.tsx    # Orchestrateur : data-fetching + rendu conditionnel
 ├── layout/        # Navbar, NavButton, NavAvatar
 ├── media/         # MediaGrid, MovieCard
-└── ui/            # SearchBar, EmptyState, ContentLoader, ContentError
+└── ui/            # SearchBar, SortButton, YearSelect, EmptyState, ContentLoader, ContentError
+
+frontend/src/hooks/
+├── useFilter.ts      # Recherche textuelle et section active (état global App)
+├── useDateFilter.ts  # Filtrage par année et ordre de tri (état local Content)
+├── useMedia.ts       # Requête TanStack Query vers le backend
+└── useDebounce.ts    # Debounce de la saisie utilisateur
 ```
 
 ## Décisions techniques
@@ -45,7 +55,7 @@ frontend/src/components/
 ### Proxy backend
 La clé API OMDb réside exclusivement côté serveur dans le backend Express. Le frontend n'envoie plus la clé dans ses requêtes : il interroge uniquement le proxy (`/api/search`), qui est le seul à communiquer avec OMDb — la clé n'est jamais exposée dans le bundle JavaScript.
 
-L'endpoint unique `GET /api/search?q=...&type=movie|series` centralise toute la logique d'accès à l'API externe et valide les paramètres en entrée.
+L'endpoint unique `GET /api/search?q=...&type=movie|series&year=YYYY` centralise toute la logique d'accès à l'API externe et valide les paramètres en entrée. Le paramètre `year` est optionnel (entier entre 1888 et 2100) et est transmis à OMDb via le paramètre `y`.
 
 ### React Compiler
 Le React Compiler (stable depuis la v1.0 de `babel-plugin-react-compiler`) est activé via Babel. L'objectif est de se familiariser avec les prochaines versions de React qui l'intègreront nativement. Il analyse le code à la compilation et insère automatiquement la mémoïsation là où elle est nécessaire — sans avoir à écrire manuellement `useMemo` ou `useCallback`.
@@ -64,6 +74,16 @@ Toute donnée malformée provoque immédiatement une erreur explicite, avant qu'
 
 ### Couche service (`mediaService.ts`)
 La logique de récupération des données est isolée dans un service dédié. Les composants se concentrent uniquement sur le rendu, ce qui rend le code plus lisible, plus maintenable et plus facilement testable unitairement.
+
+### Filtrage et tri des médias
+Les filtres sont séparés en deux hooks selon leur périmètre de responsabilité :
+
+- **`useFilter`** (état global, dans `App`) — gère la recherche textuelle et la section active (Home / Movies / TV Series). Ces valeurs sont transmises en props à `Content`.
+- **`useDateFilter`** (état local, dans `Content`) — encapsule le filtrage par année et l'ordre de tri (plus récent / plus ancien). `Content` l'appelle en interne et distribue les valeurs aux composants `YearSelect` et `SortButton`.
+
+Ce découpage garantit que `Content` n'expose que 2 props (`query`, `activeSection`) tout en restant extensible : ajouter un nouveau critère de filtre ne nécessite que d'enrichir `useDateFilter` sans modifier l'interface de `Content`.
+
+Le tri est appliqué côté client (sur les résultats déjà chargés), tandis que le filtre par année est transmis au backend pour que OMDb renvoie directement les résultats correspondants.
 
 ## Démarrage
 
