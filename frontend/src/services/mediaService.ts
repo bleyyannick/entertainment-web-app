@@ -6,9 +6,10 @@ export type { Media }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string
 
-async function apiFetch(query: string, type?: "movie" | "series"): Promise<Media[]> {
+async function apiFetch(query: string, type?: "movie" | "series", year?: number): Promise<Media[]> {
   const params = new URLSearchParams({ q: query })
   if (type) params.set("type", type)
+  if (year) params.set("year", String(year))
 
   const response = await fetch(`${API_BASE_URL}/api/search?${params.toString()}`)
 
@@ -21,23 +22,23 @@ async function apiFetch(query: string, type?: "movie" | "series"): Promise<Media
 }
 
 /** Films — s'appelle avec ou sans query. */
-export async function fetchMovies(query: string): Promise<Media[]> {
-  return apiFetch(query, "movie")
+export async function fetchMovies(query: string, year?: number): Promise<Media[]> {
+  return apiFetch(query, "movie", year)
 }
 
 /** Séries — s'appelle avec ou sans query. */
-export async function fetchSeries(query: string): Promise<Media[]> {
-  return apiFetch(query, "series")
+export async function fetchSeries(query: string, year?: number): Promise<Media[]> {
+  return apiFetch(query, "series", year)
 }
 
 /** Recherche globale (Home) — nécessite une query, retourne films + séries. */
-export async function fetchAll(query: string): Promise<Media[]> {
+export async function fetchAll(query: string, year?: number): Promise<Media[]> {
   if (!query.trim()) return []
-  return apiFetch(query)
+  return apiFetch(query, undefined, year)
 }
 
-export async function fetchMedia(section: Section, query: string): Promise<Media[]> {
-  if (section === "Movies")    return fetchMovies(query)
-  if (section === "TV Series") return fetchSeries(query)
-  return fetchAll(query)
+export async function fetchMedia(section: Section, query: string, year?: number): Promise<Media[]> {
+  if (section === "Movies")    return fetchMovies(query, year)
+  if (section === "TV Series") return fetchSeries(query, year)
+  return fetchAll(query, year)
 }
