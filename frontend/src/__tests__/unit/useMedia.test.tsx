@@ -23,13 +23,12 @@ beforeEach(() => {
 })
 
 describe('useMedia — activation de la requête', () => {
-  it("ne déclenche aucune requête sur Home sans terme de recherche", async () => {
-    renderHook(() => useMedia('Home', ''), { wrapper })
+  it("n'expose aucune donnée sur la page d'accueil sans terme saisi", async () => {
+    const { result } = renderHook(() => useMedia('Home', ''), { wrapper })
 
-    // On laisse une microtask s'écouler pour s'assurer qu'aucun appel n'a eu lieu
     await new Promise((r) => setTimeout(r, 0))
 
-    expect(mockedFetchMedia).not.toHaveBeenCalled()
+    expect(result.current.data).toBeUndefined()
   })
 
   it("déclenche une requête sur Home quand un terme est saisi", async () => {

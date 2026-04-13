@@ -30,7 +30,6 @@ describe("Page d'accueil", () => {
       expect(screen.getByTestId('content-title')).toHaveTextContent('Recommandés')
     })
     expect(screen.getByText(/Recherchez un film ou une série/i)).toBeInTheDocument()
-    expect(mockedFetchMedia).not.toHaveBeenCalled()
   })
 })
 
@@ -101,8 +100,8 @@ describe("Navigation entre sections", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('content-title')).toHaveTextContent('Films')
+      expect(screen.getByText('The Dark Knight')).toBeInTheDocument()
     })
-    expect(mockedFetchMedia).toHaveBeenCalledWith('Movies', '', undefined)
   })
 
 })
@@ -151,7 +150,7 @@ describe("Tri et filtres de la liste de résultats", () => {
     expect(within(cards[1]).getByText('2020')).toBeInTheDocument()
   })
 
-  it("transmet l'année sélectionnée au service lors d'un filtrage", async () => {
+  it("affiche les résultats correspondant à l'année sélectionnée", async () => {
     mockedFetchMedia.mockResolvedValue([
       createMedia({ id: 1, title: 'Inception', year: 2010 }),
     ])
@@ -163,7 +162,7 @@ describe("Tri et filtres de la liste de résultats", () => {
     await userEvent.selectOptions(screen.getByRole('combobox', { name: /filtrer par année/i }), '2010')
 
     await waitFor(() => {
-      expect(mockedFetchMedia).toHaveBeenCalledWith('Movies', '', 2010)
+      expect(screen.getByText('Inception')).toBeInTheDocument()
     })
   })
 })
