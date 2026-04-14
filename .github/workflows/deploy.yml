@@ -2,20 +2,17 @@ name: Deploy environment-web-app to GitHub Pages
 
 on:
   push:
-    branches: [main, deployment]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # ── 1. CI (test + lint + build) ───────────────────────────────────────────────
   ci:
     name: CI
     runs-on: ubuntu-latest
@@ -36,6 +33,10 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefix frontend && npm ci --prefix backend
 
+      - name: Lint
+        working-directory: ./frontend
+        run: npm run lint
+
       - name: Test frontend
         working-directory: ./frontend
         run: npm test
@@ -44,27 +45,24 @@ jobs:
         working-directory: ./backend
         run: npm test
 
-      - name: Lint
-        working-directory: ./frontend
-        run: npm run lint
-
       - name: Build
         working-directory: ./frontend
         run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
-          VITE_API_URL: ./data.json
 
       - name: Upload artifact Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
 
-  # ── 2. Deploy ────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy
     needs: ci
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
