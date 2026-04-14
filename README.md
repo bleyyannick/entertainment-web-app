@@ -10,7 +10,16 @@ Application web de catalogue de films et séries, permettant de rechercher, filt
 - Tri par date (plus récent / plus ancien)
 - Architecture en couches : composants, hooks, services, types
 
-> Développé avec l'assistance de GitHub Copilot. Les décisions techniques, choix d'architecture et orientations du projet restent entièrement les miens.
+## Positionnement : qualité logicielle
+
+Ce projet met volontairement l'accent sur la qualité logicielle comme critère différenciant.
+
+- **Tests orientés comportement** : les scénarios valident des résultats fonctionnels (ce que l'utilisateur voit, ce que l'API renvoie), plutôt que des détails d'implémentation fragiles.
+- **Validation des données au runtime** : les réponses externes sont validées avec Zod côté backend et frontend pour éviter la propagation de données invalides.
+- **Séparation claire des responsabilités** : composants, hooks, services et types sont découplés pour faciliter l'évolution et la testabilité.
+- **Chaîne d'intégration stricte** : analyse statique, tests puis compilation avant tout déploiement.
+
+Objectif : démontrer une capacité à produire un code fiable, maintenable et vérifiable dans la durée.
 
 ## Structure du dépôt
 
@@ -131,7 +140,7 @@ cd frontend && npm run build
 cd frontend && npm run preview   # prévisualiser le build localement
 ```
 
-### Lint
+### Analyse statique du code (lint)
 
 ```bash
 cd frontend && npm run lint
@@ -139,7 +148,7 @@ cd frontend && npm run lint
 
 ### Tests
 
-Les tests sont automatiquement exécutés dans la CI GitHub Actions à chaque push sur `main` ou `deployment`, avant le lint et le build — le déploiement est bloqué en cas d'échec.
+La chaîne d'intégration GitHub Actions exécute automatiquement l'analyse statique du code, les tests frontend/backend, puis la compilation de production à chaque push sur `main` — le déploiement est bloqué en cas d'échec.
 
 Chaque couche dispose de sa propre suite Vitest :
 
@@ -206,6 +215,6 @@ Les tests unitaires sont en place sur les deux couches service (frontend et back
 | Frontend (statique) | GitHub Pages | [bleyyannick.github.io/entertainment-web-app](https://bleyyannick.github.io/entertainment-web-app/) |
 | Backend (proxy Node.js) | Railway | `https://entertainment-web-app-production-9f90.up.railway.app` |
 
-Le déploiement du frontend est automatisé via GitHub Actions (`.github/workflows/deploy.yml`) : tout push sur `main` ou `deployment` déclenche un build puis un déploiement sur GitHub Pages. La variable `BASE_PATH` est injectée automatiquement par le workflow pour que Vite génère les bons chemins d'assets.
+Le déploiement du frontend est automatisé via GitHub Actions (`.github/workflows/deploy.yml`) : tout push sur `main` déclenche la chaîne d'intégration (analyse statique, tests, compilation), puis un déploiement sur GitHub Pages. Le pipeline peut aussi être lancé manuellement depuis l'interface GitHub Actions. La variable `BASE_PATH` est injectée automatiquement pour que Vite génère les bons chemins d'assets.
 
-`frontend/.env.production` contient l'URL du backend Railway — aucune configuration supplémentaire n'est nécessaire pour un build de production.
+`frontend/.env.production` contient l'URL du backend Railway — aucune configuration supplémentaire n'est nécessaire pour une compilation de production.
