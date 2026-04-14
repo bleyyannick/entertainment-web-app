@@ -7,7 +7,11 @@ interface SearchBarProps {
 
 export default function SearchBar({ value, onChange }: SearchBarProps) {
   return (
-    <search className="flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-4">
+    <form
+      role="search"
+      className="flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-4"
+      onSubmit={(event) => event.preventDefault()}
+    >
 
       <label htmlFor="search-input" className="sr-only">
         Search
@@ -34,6 +38,6 @@ export default function SearchBar({ value, onChange }: SearchBarProps) {
           [&::-webkit-search-cancel-button]:hidden"
       />
 
-    </search>
+    </form>
   )
 }
