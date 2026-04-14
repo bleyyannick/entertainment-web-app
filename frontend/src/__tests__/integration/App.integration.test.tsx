@@ -104,6 +104,24 @@ describe("Navigation entre sections", () => {
     })
   })
 
+  it("bascule sur la section Séries au clic sur le bouton correspondant", async () => {
+    const series = [
+      createMedia({ id: 20, title: 'Breaking Bad', year: 2008, category: 'TV Series' }),
+    ]
+    mockedFetchMedia.mockResolvedValue(series)
+
+    renderWithProviders(<App />)
+
+    // Il y a deux NavButton "TV Series" (mobile + desktop) — on cible le premier
+    const tvSeriesButtons = screen.getAllByRole('button', { name: 'TV Series' })
+    await userEvent.click(tvSeriesButtons[0])
+
+    await waitFor(() => {
+      expect(screen.getByTestId('content-title')).toHaveTextContent('Séries')
+      expect(screen.getByText('Breaking Bad')).toBeInTheDocument()
+    })
+  })
+
 })
 
 // ─── Scénario 4 : tri et filtre par année ────────────────────────────────────
