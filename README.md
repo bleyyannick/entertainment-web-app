@@ -169,15 +169,17 @@ backend/src/__tests__/
 ├── factories/
 │   └── omdbFactory.ts         # createOmdbSearchResult, createOmdbSearchResponse
 ├── unit/
-│   └── omdbService.test.ts    # searchOmdb — logique de normalisation OMDb
-└── integration/               # réservé (tests HTTP à venir)
+│   └── omdbService.test.ts    # comportement du service OMDb (résultats, erreurs, normalisation)
+└── integration/
+	└── searchRoute.test.ts    # comportement HTTP de /api/search (validation, réponses, erreurs)
 
 frontend/src/__tests__/
 ├── factories/
 │   └── mediaFactory.ts        # createMedia
 ├── unit/
-│   └── mediaService.test.ts   # fetchMovies, fetchSeries, fetchAll, fetchMedia
-└── integration/               # réservé (tests composants à venir)
+│   └── *.test.ts(x)           # hooks, services et composants UI (comportements attendus)
+└── integration/
+	└── App.integration.test.tsx # parcours utilisateur principaux dans l'application
 ```
 
 ### Factories de test
@@ -185,20 +187,19 @@ Plutôt que de définir des fixtures statiques dans chaque fichier de test, les 
 
 ### Couverture actuelle
 
-**Backend — `omdbService.ts`** (`searchOmdb`) :
-- Lève une erreur si `OMDB_API_KEY` est absente de l'environnement
-- Fonctionne avec une query vide ou renseignée
-- Retourne `[]` si OMDb répond `Response: "False"`
-- Lève une erreur si la requête réseau échoue
-- Lève une erreur si la réponse OMDb ne respecte pas le schéma Zod attendu
-- Normalise le type OMDb : `movie` → catégorie `"Movie"`, `series` → `"TV Series"`
-- Remplace le poster `"N/A"` par une chaîne vide
+**Backend (service + route `/api/search`)** :
+- Refuse les entrées invalides (type ou année invalide) et protège l'API avec des réponses d'erreur explicites.
+- Retourne une liste vide lorsque la recherche ne trouve aucun résultat.
+- Renvoie les résultats attendus quand les paramètres sont valides, y compris avec ou sans terme de recherche.
+- Convertit les données OMDb en format applicatif cohérent (`Movie` / `TV Series`, poster vide si non fourni).
+- Signale proprement les pannes réseau ou erreurs du fournisseur externe.
 
-**Frontend — `mediaService.ts`** (`fetchMovies`, `fetchSeries`, `fetchAll`, `fetchMedia`) :
-- Retourne les médias renvoyés par le proxy backend
-- Lève une erreur si la réponse réseau est en échec
-- `fetchAll` retourne `[]` si la query est vide ou ne contient que des espaces
-- `fetchMedia` délègue vers la bonne fonction selon la section active (`Movies`, `TV Series`, `Home`)
+**Frontend (App, hooks, services, composants UI)** :
+- Affiche les bons états d'interface selon le contexte : invite à rechercher, résultats, état vide, message d'erreur.
+- Déclenche la recherche au bon moment (avec debounce) et selon la section active (Home / Movies / TV Series).
+- Applique correctement les interactions utilisateur : tri, filtre par année, changement de section.
+- Vérifie les comportements visibles des composants (ex. intitulés, valeurs affichées, actions au clic).
+- Garantit que le service de données construit les bonnes requêtes et gère les erreurs de manière prévisible.
 
 ## Points d'amélioration connus
 
@@ -206,7 +207,7 @@ Plutôt que de définir des fixtures statiques dans chaque fichier de test, les 
 Le proxy Express fonctionne mais peut être renforcé en appliquant les principes SOLID : séparation claire des responsabilités entre le routeur, la logique métier et l'accès à l'API externe, injection de dépendances pour faciliter les tests unitaires du service OMDb, etc.
 
 ### Tests
-Les tests unitaires sont en place sur les deux couches service (frontend et backend). Les dossiers `integration/` sont réservés pour de futurs tests HTTP (backend) et tests de rendu composant (frontend, avec React Testing Library).
+Les tests couvrent déjà les comportements clés côté backend (service + route HTTP) et frontend (App, hooks, services, composants). Les prochains axes d'amélioration portent surtout sur l'extension des scénarios métier (cas limites supplémentaires, parcours utilisateurs plus variés, résilience aux erreurs externes).
 
 ## Déploiement
 
