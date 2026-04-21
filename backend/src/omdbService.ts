@@ -5,7 +5,7 @@ const OMDB_API_KEY = process.env.OMDB_API_KEY
 const OMDB_BASE_URL = "https://www.omdbapi.com"
 const DEFAULT_BROWSE_TERM = "the"
 
-function normalizeOmdb(item: OmdbSearchResult, index: number): Media {
+export function normalizeOmdb(item: OmdbSearchResult, index: number): Media {
   const poster = item.Poster !== "N/A" ? item.Poster : ""
   const year = parseInt(item.Year, 10) || 0
   const category: "Movie" | "TV Series" = item.Type === "series" ? "TV Series" : "Movie"
@@ -19,10 +19,9 @@ function normalizeOmdb(item: OmdbSearchResult, index: number): Media {
   }
 }
 
-export async function searchOmdb(query: string, type?: "movie" | "series", year?: number): Promise<Media[]> {
+async function fetchOmdbResults(term: string, type?: "movie" | "series", year?: number): Promise<OmdbSearchResult[]> {
   if (!OMDB_API_KEY) throw new Error("OMDB_API_KEY is not set")
 
-  const term = query.trim() || DEFAULT_BROWSE_TERM
   const params = new URLSearchParams({ apikey: OMDB_API_KEY, s: term })
   if (type) params.set("type", type)
   if (year) params.set("y", String(year))
@@ -44,5 +43,11 @@ export async function searchOmdb(query: string, type?: "movie" | "series", year?
 
   if (data.Response === "False") return []
 
-  return (data.Search ?? []).map(normalizeOmdb)
+  return data.Search ?? []
+}
+
+export async function searchOmdb(query: string, type?: "movie" | "series", year?: number): Promise<Media[]> {
+  const term = query.trim() || DEFAULT_BROWSE_TERM
+  const results = await fetchOmdbResults(term, type, year)
+  return results.map(normalizeOmdb)
 }

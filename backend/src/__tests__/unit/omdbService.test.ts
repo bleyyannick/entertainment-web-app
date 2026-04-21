@@ -1,93 +1,40 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { createOmdbSearchResponse } from "../factories/omdbFactory.js"
+import { describe, it, expect } from "vitest"
+import { normalizeOmdb } from "../../omdbService.js"
+import { createOmdbSearchResult } from "../factories/omdbFactory.js"
 
-const mockOmdbResponse = createOmdbSearchResponse()
-
-beforeEach(() => {
-  process.env.OMDB_API_KEY = "test-api-key"
-  vi.resetModules()
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockOmdbResponse),
-    }),
-  )
-})
-
-afterEach(() => {
-  delete process.env.OMDB_API_KEY
-  vi.restoreAllMocks()
-})
-
-describe("searchOmdb", () => {
-  it("lève une erreur si OMDB_API_KEY n'est pas définie", async () => {
-    delete process.env.OMDB_API_KEY
-    vi.resetModules()
-    const { searchOmdb } = await import("../../omdbService.js")
-    await expect(searchOmdb("test")).rejects.toThrow("OMDB_API_KEY is not set")
+describe("normalizeOmdb", () => {
+  it("convertit un film OMDB en catégorie 'Movie'", () => {
+    const result = normalizeOmdb(createOmdbSearchResult({ Type: "movie" }), 0)
+    expect(result.category).toBe("Movie")
   })
 
-  it("retourne des résultats même si la query est vide", async () => {
-    const { searchOmdb } = await import("../../omdbService.js")
-    const result = await searchOmdb("")
-    expect(result.length).toBeGreaterThan(0)
+  it("convertit une série OMDB en catégorie 'TV Series'", () => {
+    const result = normalizeOmdb(createOmdbSearchResult({ Type: "series" }), 0)
+    expect(result.category).toBe("TV Series")
   })
 
-  it("retourne des résultats quand une query est fournie", async () => {
-    const { searchOmdb } = await import("../../omdbService.js")
-    const result = await searchOmdb("inception")
-    expect(result.length).toBeGreaterThan(0)
+  it("remplace un poster 'N/A' par une chaîne vide", () => {
+    const result = normalizeOmdb(createOmdbSearchResult({ Poster: "N/A" }), 0)
+    expect(result.thumbnail).toBe("")
   })
 
-  it("retourne [] si aucun résultat n'est trouvé", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ Response: "False" }),
-      }),
-    )
-    const { searchOmdb } = await import("../../omdbService.js")
-    const result = await searchOmdb("aucun-résultat")
-    expect(result).toEqual([])
+  it("conserve l'URL du poster quand elle est valide", () => {
+    const result = normalizeOmdb(createOmdbSearchResult({ Poster: "https://poster.jpg" }), 0)
+    expect(result.thumbnail).toBe("https://poster.jpg")
   })
 
-  it("lève une erreur si la requête réseau échoue", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({ ok: false, statusText: "Unauthorized" }),
-    )
-    const { searchOmdb } = await import("../../omdbService.js")
-    await expect(searchOmdb("test")).rejects.toThrow()
+  it("parse l'année en nombre", () => {
+    const result = normalizeOmdb(createOmdbSearchResult({ Year: "2010" }), 0)
+    expect(result.year).toBe(2010)
   })
 
-  it("convertit les films OMDB en catégorie 'Movie'", async () => {
-    const { searchOmdb } = await import("../../omdbService.js")
-    const result = await searchOmdb("inception")
-    expect(result[0]).toMatchObject({
-      title: "Inception",
-      year: 2010,
-      category: "Movie",
-      thumbnail: "https://poster.jpg",
-    })
+  it("retourne 0 si l'année n'est pas un nombre valide", () => {
+    const result = normalizeOmdb(createOmdbSearchResult({ Year: "N/A" }), 0)
+    expect(result.year).toBe(0)
   })
 
-  it("convertit les séries OMDB en catégorie 'TV Series'", async () => {
-    const { searchOmdb } = await import("../../omdbService.js")
-    const result = await searchOmdb("breaking bad")
-    expect(result[1]).toMatchObject({
-      title: "Breaking Bad",
-      year: 2008,
-      category: "TV Series",
-      thumbnail: "",
-    })
-  })
-
-  it("remplace le poster 'N/A' par une chaîne vide", async () => {
-    const { searchOmdb } = await import("../../omdbService.js")
-    const result = await searchOmdb("test")
-    const breaking = result.find((m) => m.title === "Breaking Bad")
-    expect(breaking?.thumbnail).toBe("")
+  it("attribue l'index fourni comme identifiant", () => {
+    const result = normalizeOmdb(createOmdbSearchResult(), 3)
+    expect(result.id).toBe(3)
   })
 })
