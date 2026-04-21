@@ -39,11 +39,21 @@ jobs:
 
       - name: Test frontend
         working-directory: ./frontend
-        run: npm test
+        run: npm test -- --coverage --coverage.reporter=lcov --coverage.reporter=html
+        env:
+          CI: true
 
       - name: Test backend
         working-directory: ./backend
         run: npm test
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: frontend/coverage/
+          retention-days: 30
 
       - name: Build
         working-directory: ./frontend
