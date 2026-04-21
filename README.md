@@ -218,4 +218,10 @@ Les tests couvrent déjà les comportements clés côté backend (service + rout
 
 Le déploiement du frontend est automatisé via GitHub Actions (`.github/workflows/deploy.yml`) : tout push sur `main` déclenche la chaîne d'intégration (analyse statique, tests, compilation), puis un déploiement sur GitHub Pages. Le pipeline peut aussi être lancé manuellement depuis l'interface GitHub Actions. La variable `BASE_PATH` est injectée automatiquement pour que Vite génère les bons chemins d'assets.
 
+### Rapports de tests et couverture
+
+Les résultats des tests frontend et backend sont publiés automatiquement dans l'onglet **Checks** de chaque commit ou pull request sur GitHub — sans avoir à télécharger de fichier ni consulter les logs bruts.
+
+La couverture de code du frontend est intégrée au déploiement : le rapport HTML est accessible publiquement à l'adresse [`<url_du_site>/coverage/`](https://bleyyannick.github.io/entertainment-web-app/coverage/).
+
 `frontend/.env.production` contient l'URL du backend Railway — aucune configuration supplémentaire n'est nécessaire pour une compilation de production.
