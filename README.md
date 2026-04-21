@@ -66,9 +66,6 @@ La clé API OMDb réside exclusivement côté serveur dans le backend Express. L
 
 L'endpoint unique `GET /api/search?q=...&type=movie|series&year=YYYY` centralise toute la logique d'accès à l'API externe et valide les paramètres en entrée. Le paramètre `year` est optionnel (entier entre 1888 et 2100) et est transmis à OMDb via le paramètre `y`.
 
-### React Compiler
-Le React Compiler (stable depuis la v1.0 de `babel-plugin-react-compiler`) est activé via Babel. L'objectif est de se familiariser avec les prochaines versions de React qui l'intègreront nativement. Il analyse le code à la compilation et insère automatiquement la mémoïsation là où elle est nécessaire — sans avoir à écrire manuellement `useMemo` ou `useCallback`.
-
 ### Cache TanStack Query
 Chaque requête est mise en cache avec un `staleTime` de 5 minutes et un `gcTime` de 10 minutes. Cela évite les appels HTTP redondants lors de la navigation entre sections ou d'une recherche identique, ce qui améliore les performances réseau et offre une expérience utilisateur plus fluide.
 
