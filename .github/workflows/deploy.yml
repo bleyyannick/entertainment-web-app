@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 concurrency:
   group: pages-${{ github.ref }}
@@ -38,28 +39,43 @@ jobs:
         run: npm run lint
 
       - name: Test frontend
+        if: always()
         working-directory: ./frontend
-        run: npm test -- --coverage --coverage.reporter=lcov --coverage.reporter=html
+        run: npm test -- --reporter=junit --outputFile=junit-results.xml --coverage --coverage.reporter=lcov --coverage.reporter=html
         env:
           CI: true
 
       - name: Test backend
-        working-directory: ./backend
-        run: npm test
-
-      - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        working-directory: ./backend
+        run: npm test -- --reporter=junit --outputFile=junit-results.xml
+        env:
+          CI: true
+
+      - name: Publish frontend test report
+        if: always()
+        uses: dorny/test-reporter@v1
         with:
-          name: coverage-report
-          path: frontend/coverage/
-          retention-days: 30
+          name: "Vitest — frontend"
+          path: frontend/junit-results.xml
+          reporter: jest-junit
+
+      - name: Publish backend test report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: "Vitest — backend"
+          path: backend/junit-results.xml
+          reporter: jest-junit
 
       - name: Build
         working-directory: ./frontend
         run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
+
+      - name: Copy coverage report into dist
+        run: cp -r frontend/coverage/html frontend/dist/coverage
 
       - name: Upload artifact Pages
         uses: actions/upload-pages-artifact@v3
