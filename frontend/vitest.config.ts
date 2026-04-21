@@ -11,6 +11,7 @@ export default mergeConfig(viteConfig, defineConfig({
       provider: 'v8',
       reporter: ['lcov', 'html', 'text'],
       reportsDirectory: './coverage',
+      exclude: ['src/main.tsx'],
     },
   },
 }))

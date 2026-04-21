@@ -75,7 +75,7 @@ jobs:
           BASE_PATH: /${{ github.event.repository.name }}/
 
       - name: Copy coverage report into dist
-        run: cp -r frontend/coverage/html frontend/dist/coverage
+        run: cp -r frontend/coverage frontend/dist/coverage
 
       - name: Upload artifact Pages
         uses: actions/upload-pages-artifact@v3
