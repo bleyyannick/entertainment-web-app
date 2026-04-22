@@ -56,15 +56,19 @@ jobs:
 
       - name: Run unit tests
         working-directory: ./frontend
-        run: npm run test:unit -- --reporter=junit --outputFile=junit-unit.xml --coverage --coverage.reporter=lcov --coverage.reporter=html
+        run: npm run test:unit:ci
         env:
           CI: true
 
       - name: Run integration tests
         working-directory: ./frontend
-        run: npm run test:integration -- --reporter=junit --outputFile=junit-integration.xml
+        run: npm run test:integration:ci
         env:
           CI: true
+
+      - name: Publish frontend coverage summary
+        if: always()
+        run: node scripts/ci/publish-frontend-coverage-summary.cjs
 
       - name: Publish unit test report
         if: always()
@@ -108,15 +112,19 @@ jobs:
 
       - name: Run unit tests
         working-directory: ./backend
-        run: npm run test:unit -- --reporter=junit --outputFile=junit-unit.xml
+        run: npm run test:unit:ci
         env:
           CI: true
 
       - name: Run integration tests
         working-directory: ./backend
-        run: npm run test:integration -- --reporter=junit --outputFile=junit-integration.xml
+        run: npm run test:integration:ci
         env:
           CI: true
+
+      - name: Publish backend coverage summary
+        if: always()
+        run: node scripts/ci/publish-backend-coverage-summary.cjs
 
       - name: Publish unit test report
         if: always()
