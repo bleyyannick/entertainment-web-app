@@ -61,7 +61,6 @@ jobs:
           CI: true
 
       - name: Run integration tests
-        if: always()
         working-directory: ./frontend
         run: npm run test:integration -- --reporter=junit --outputFile=junit-integration.xml
         env:
@@ -114,7 +113,6 @@ jobs:
           CI: true
 
       - name: Run integration tests
-        if: always()
         working-directory: ./backend
         run: npm run test:integration -- --reporter=junit --outputFile=junit-integration.xml
         env:
