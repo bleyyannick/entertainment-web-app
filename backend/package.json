@@ -8,7 +8,9 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:unit": "vitest run src/__tests__/unit",
+    "test:unit:ci": "npm run test:unit -- --reporter=junit --outputFile=junit-unit.xml --coverage --coverage.reporter=json-summary --coverage.reporter=lcov --coverage.reporter=html --coverage.reportsDirectory=coverage/unit",
     "test:integration": "vitest run src/__tests__/integration",
+    "test:integration:ci": "npm run test:integration -- --reporter=junit --outputFile=junit-integration.xml --coverage --coverage.reporter=json-summary --coverage.reporter=lcov --coverage.reporter=html --coverage.reportsDirectory=coverage/integration",
     "test:watch": "vitest"
   },
   "dependencies": {
