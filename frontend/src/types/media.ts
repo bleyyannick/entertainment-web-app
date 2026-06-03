@@ -3,7 +3,7 @@ import { z } from "zod"
 export type Section = "Home" | "Movies" | "TV Series"
 
 export const MediaSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   title: z.string(),
   thumbnail: z.string(),
   year: z.number(),

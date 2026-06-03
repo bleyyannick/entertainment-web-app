@@ -21,7 +21,7 @@ const sectionLabel: Record<Section, string> = {
 
 export default function Content({ query, activeSection }: ContentProps) {
   const { year, sortOrder, toggleOrder, toggleYear } = useDateFilter()
-  const { data: media, isLoading, isError } = useMedia(activeSection, query, year)
+  const { data: media, isLoading, isError, refetch } = useMedia(activeSection, query, year)
   const sortedMedia = media
     ? [...media].sort((a, b) => sortOrder === "desc" ? b.year - a.year : a.year - b.year)
     : []
@@ -38,7 +38,7 @@ export default function Content({ query, activeSection }: ContentProps) {
   if (isError) {
     return (
       <main data-testid="content" className="min-h-screen bg-[#0d1117] px-8 pt-4 pb-10">
-        <ContentError />
+        <ContentError onRetry={refetch} />
       </main>
     )
   }

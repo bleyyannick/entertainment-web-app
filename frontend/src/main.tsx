@@ -4,6 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.tsx'
 
+if (!import.meta.env.VITE_API_BASE_URL) {
+  throw new Error("Missing required environment variable: VITE_API_BASE_URL")
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
