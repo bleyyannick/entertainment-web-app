@@ -2,7 +2,7 @@ import "dotenv/config"
 import express from "express"
 import cors from "cors"
 import { pathToFileURL } from "node:url"
-import { searchOmdb } from "./omdbService.js"
+import { searchOmdb, OmdbError } from "./omdbService.js"
 
 const PORT = process.env.PORT ?? 3001
 
@@ -19,6 +19,11 @@ export function createApp() {
     const query = typeof req.query.q === "string" ? req.query.q : ""
     const rawType = req.query.type
     const rawYear = req.query.year
+
+    if (query.length > 500) {
+      res.status(400).json({ error: "Query too long. Maximum 500 characters." })
+      return
+    }
 
     if (rawType !== undefined && !VALID_TYPES.includes(rawType as ValidType)) {
       res.status(400).json({ error: "Invalid type. Must be 'movie' or 'series'." })
@@ -46,7 +51,9 @@ export function createApp() {
       res.json(results)
     } catch (err) {
       console.error(err)
-      res.status(502).json({ error: "Failed to fetch data from OMDb." })
+      const status = err instanceof OmdbError ? err.statusCode : 502
+      const message = err instanceof Error ? err.message : "Failed to fetch data from OMDb."
+      res.status(status).json({ error: message })
     }
   })
 
@@ -54,6 +61,10 @@ export function createApp() {
 }
 
 export function startServer(port = PORT) {
+  if (!process.env.OMDB_API_KEY) {
+    throw new Error("Missing required environment variable: OMDB_API_KEY")
+  }
+
   const app = createApp()
 
   return app.listen(port, () => {

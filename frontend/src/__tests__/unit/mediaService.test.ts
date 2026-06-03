@@ -4,7 +4,7 @@ import { createMedia } from "../factories/mediaFactory"
 
 const mockMedia = [
   createMedia(),
-  createMedia({ id: 1, title: "Breaking Bad", thumbnail: "https://img2.jpg", year: 2008, category: "TV Series" }),
+  createMedia({ id: "tt0903747", title: "Breaking Bad", thumbnail: "https://img2.jpg", year: 2008, category: "TV Series" }),
 ]
 
 const mockFetch = vi.fn()

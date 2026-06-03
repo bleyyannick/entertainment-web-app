@@ -19,7 +19,7 @@ export type OmdbSearchResult = z.infer<typeof OmdbSearchResultSchema>
 export type OmdbSearchResponse = z.infer<typeof OmdbSearchResponseSchema>
 
 export interface Media {
-  id: number
+  id: string
   title: string
   thumbnail: string
   year: number
